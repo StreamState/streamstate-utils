@@ -20,7 +20,7 @@ def test_folder_location():
 def test_get_cassandra_table_name_from_app_name():
     app_name = "myapp"
     version = "1"
-    assert get_folder_location(app_name, version) == "myapp_1"
+    assert get_cassandra_table_name_from_app_name(app_name, version) == "myapp_1"
 
 
 def test_map_avro_to_spark():
