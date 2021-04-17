@@ -2,4 +2,4 @@
 
 # streamstate-utils
 
-Set of utils for managing cassandra and pyspark.  Intended for use only with StreamState
+Set of utils for managing cassandra and pyspark.  Intended for use only with StreamState.
