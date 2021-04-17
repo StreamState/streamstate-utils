@@ -17,7 +17,7 @@ def helper_for_file(
     inputs: List[InputStruct],
     spark: SparkSession,
     expecteds: List[dict],
-) -> StreamingQuery:
+):
     """
     This will be used for unit testing developer code
     Major inputs:
