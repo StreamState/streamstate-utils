@@ -9,7 +9,8 @@ jobs:
       with:
         python-version: '3.7'
         architecture: x64
-    - run: pip install poetry==1.0.5
+    - run: pip install poetry==1.0.5,
+    - run: pip install poetry-dynamic-versioning
     - run: poetry install
     - run: poetry run mypy .
     - run: poetry run pytest --cov=streamstate_utils --cov-report=xml
