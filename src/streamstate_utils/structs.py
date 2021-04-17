@@ -11,6 +11,15 @@ class OutputStruct:
     checkpoint_location: str
     output_name: str
     processing_time: str = "0"
+    # primary_keys: List[str] = []  # not needed if dont persist to cassandra
+    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
+
+
+@dataclass
+class TableStruct:
+    primary_keys: List[str]
+    # organization: str
+    output_schema: dict  # avro schema
     Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
 
