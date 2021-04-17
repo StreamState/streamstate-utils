@@ -2,6 +2,8 @@ from streamstate_utils.utils import (
     get_folder_location,
     get_cassandra_table_name_from_app_name,
     map_avro_to_spark_schema,
+    get_cassandra_outputs_from_config_map,
+    get_cassandra_inputs_from_config_map,
 )
 from pyspark.sql.types import (
     IntegerType,
@@ -9,6 +11,7 @@ from pyspark.sql.types import (
     StructType,
     FloatType,
 )
+import os
 
 
 def test_folder_location():
@@ -30,3 +33,21 @@ def test_map_avro_to_spark():
     ]
     result = map_avro_to_spark_schema(fields)
     assert result.fieldNames() == ["myfield1", "myfield2"]
+
+
+def test_get_cassandra_inputs_from_config_map():
+    os.environ["data_center"] = "dc"
+    os.environ["cassandra_cluster_name"] = "ccn"
+    os.environ["port"] = "9042"
+    os.environ["username"] = "user"
+    os.environ["password"] = "pass"
+    result = get_cassandra_inputs_from_config_map()
+    assert result.cassandra_ip == "ccn-dc-service"
+
+
+def test_get_cassandra_outputs_from_config_map():
+    os.environ["organization"] = "testorg"
+    os.environ["cassandra_cluster_name"] = "ccn"
+    result = get_cassandra_outputs_from_config_map("myapp", "1")
+    assert result.cassandra_key_space == "testorg"
+    assert result.cassandra_table_name == "myapp_1"

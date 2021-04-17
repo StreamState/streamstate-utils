@@ -35,14 +35,19 @@ class InputStruct:
 
 
 @dataclass
-class CassandraStruct:
-    cassandra_cluster: str
+class CassandraInputStruct:
     cassandra_ip: str
     cassandra_port: str
-    cassandra_key_space: str
-    cassandra_table_name: str
     cassandra_password: str
     cassandra_user: str
+    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
+
+
+@dataclass
+class CassandraOutputStruct:
+    cassandra_cluster: str
+    cassandra_key_space: str
+    cassandra_table_name: str
     Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
 

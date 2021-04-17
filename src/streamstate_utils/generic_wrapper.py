@@ -9,7 +9,8 @@ import json
 from streamstate_utils.structs import (
     OutputStruct,
     FileStruct,
-    CassandraStruct,
+    CassandraInputStruct,
+    CassandraOutputStruct,
     KafkaStruct,
     InputStruct,
 )
@@ -40,7 +41,7 @@ def kafka_wrapper(
 
 
 def set_cassandra(
-    cassandra: CassandraStruct,
+    cassandra: CassandraInputStruct,
     spark: SparkSession,
 ):
     spark.conf.set("spark.cassandra.connection.host", cassandra.cassandra_ip)
@@ -76,7 +77,7 @@ def write_parquet(batch_df: DataFrame, output_folder: str):
 
 
 # make sure to call set_cassandra before this
-def write_cassandra(batch_df: DataFrame, cassandra: CassandraStruct):
+def write_cassandra(batch_df: DataFrame, cassandra: CassandraOutputStruct):
     batch_df.write.format("org.apache.spark.sql.cassandra").option(
         "keyspace", cassandra.cassandra_key_space
     ).option("table", cassandra.cassandra_table_name).option(
