@@ -65,3 +65,18 @@ def helper_for_file(
     finally:
         q.stop()
         shutil.rmtree(file_dir)
+
+
+def main():
+    [name, path_to_process, path_to_inputs, path_to_outputs] = sys.argv
+    input_schema = marshmallow_dataclass.class_schema(InputStruct)()
+    with open(path_to_process) as f:
+        exec(f.read())  # exports process as function
+    with open(path_to_inputs) as f:
+        inputs = [input_schema.load(v) for v in json.load(f)]
+    with open(path_to_outputs) as f:
+        outputs = json.load(f)
+    spark = SparkSession.builder.master("local").appName("tests").getOrCreate()
+    helper_for_file(
+        "testprocess", "2d", process, inputs, spark, outputs  # type: ignore
+    )

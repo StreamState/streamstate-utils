@@ -15,6 +15,9 @@ vcs = "git"
 marshmallow-dataclass = "^8.4.1"
 python = "^3.7"
 
+[tool.poetry.scripts]
+run-test = "streamstate_utils.run_test:main"
+
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
 codecov = "^2.1.11"
