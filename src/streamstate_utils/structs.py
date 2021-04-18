@@ -8,7 +8,7 @@ from typing import ClassVar, Type, List, Dict
 @dataclass
 class OutputStruct:
     mode: str
-    checkpoint_location: str
+    checkpoint_location: str  # this should almost certainly not be here....derive from the cluster
     output_name: str
     processing_time: str = "0"
     # primary_keys: List[str] = []  # not needed if dont persist to cassandra

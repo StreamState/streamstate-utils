@@ -1,16 +1,4 @@
-from pyspark.sql.types import (
-    IntegerType,
-    StringType,
-    StructField,
-    StructType,
-    BooleanType,
-    LongType,
-    DoubleType,
-    FloatType,
-    DataType,
-)
-from typing import List, Dict, Tuple, Callable, NamedTuple
-from pyspark.sql import DataFrame
+from typing import Dict, Tuple
 from streamstate_utils.structs import CassandraInputStruct, CassandraOutputStruct
 import os
 
@@ -79,36 +67,4 @@ def get_cassandra_outputs_from_config_map(
             env_var["organization"]
         ),
         cassandra_table_name=get_cassandra_table_name_from_app_name(app_name, version),
-    )
-
-
-def get_output_from_config_map(app_name: str, version: str) -> CassandraOutputStruct:
-    env_var = _get_env_variables_from_config_map()
-    return CassandraOutputStruct(
-        cassandra_cluster=env_var["cassandra_cluster_name"],
-        cassandra_key_space=get_cassandra_key_space_from_org_name(
-            env_var["organization"]
-        ),
-        cassandra_table_name=get_cassandra_table_name_from_app_name(app_name, version),
-    )
-
-
-def _convert_type(avro_type: str) -> DataType:
-    avro_type_conversion = {
-        "boolean": BooleanType(),
-        "int": IntegerType(),
-        "long": LongType(),
-        "float": FloatType(),
-        "double": DoubleType(),
-        "string": StringType(),
-    }
-    return avro_type_conversion[avro_type]
-
-
-def map_avro_to_spark_schema(fields: List[Dict[str, str]]) -> StructType:
-    return StructType(
-        [
-            StructField(field["name"], _convert_type(field["type"]), True)
-            for field in fields
-        ]
     )
