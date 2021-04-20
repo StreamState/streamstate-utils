@@ -7,7 +7,7 @@ import json
 import shutil
 from typing import List, Dict, Tuple, Callable
 import pyspark.sql.functions as F
-from streamstate_utils.structs import InputStruct, SchemaStruct
+from streamstate_utils.structs import InputStruct
 
 # def helper_for_testing(process: Callable[[DataFrame], None], inputs: List[dict], output_mode:str):
 #    inputs.
@@ -28,7 +28,7 @@ def test_helper_for_file_succeeds(spark: SparkSession):
         [
             InputStruct(
                 topic="topic1",
-                schema=SchemaStruct(fields=[{"name": "field1", "type": "string"}]),
+                schema={"fields": [{"name": "field1", "type": "string"}]},
                 sample=[{"field1": "somevalue"}],
             )
         ],
@@ -63,12 +63,12 @@ def test_helper_for_file_succeeds_multiple_topics_and_rows(spark: SparkSession):
         [
             InputStruct(
                 topic="topic1",
-                schema=SchemaStruct(
-                    fields=[
+                schema={
+                    "fields": [
                         {"name": "field1", "type": "string"},
                         {"name": "value1", "type": "string"},
                     ]
-                ),
+                },
                 sample=[
                     {"field1": "somevalue", "value1": "hi1"},
                     {"field1": "somevalue1", "value1": "hi2"},
@@ -76,12 +76,12 @@ def test_helper_for_file_succeeds_multiple_topics_and_rows(spark: SparkSession):
             ),
             InputStruct(
                 topic="topic2",
-                schema=SchemaStruct(
-                    fields=[
+                schema={
+                    "fields": [
                         {"name": "field1id", "type": "string"},
                         {"name": "value2", "type": "string"},
                     ]
-                ),
+                },
                 sample=[
                     {"field1id": "somevalue", "value2": "goodbye1"},
                     {"field1id": "somevalue1", "value2": "goodbye2"},
@@ -105,7 +105,7 @@ def test_helper_for_file_fails(spark: SparkSession):
             [
                 InputStruct(
                     topic="topic1",
-                    schema=SchemaStruct(fields=[{"name": "field1", "type": "string"}]),
+                    schema={"fields": [{"name": "field1", "type": "string"}]},
                     sample=[{"field1": "somevalue1"}],
                 )
             ],
@@ -115,15 +115,15 @@ def test_helper_for_file_fails(spark: SparkSession):
 
 
 def test_file_wrapper(spark: SparkSession):
-    file_dir = "test_file_wrapper"
+    app_name = "mytest"
     try:
-        shutil.rmtree(file_dir)
+        shutil.rmtree(app_name)
         print("folder exists, deleting")
     except:
         print("folder doesn't exist, creating")
 
-    app_name = "mytest"
     os.mkdir(app_name)
+    file_dir = "test_file_wrapper"
     os.mkdir(os.path.join(app_name, file_dir))
 
     df = file_wrapper(
@@ -133,7 +133,7 @@ def test_file_wrapper(spark: SparkSession):
         [
             InputStruct(
                 topic=file_dir,
-                schema=SchemaStruct(fields=[{"name": "field1", "type": "string"}]),
+                schema={"fields": [{"name": "field1", "type": "string"}]},
             )
         ],
         spark,

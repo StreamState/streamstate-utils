@@ -32,7 +32,7 @@ def kafka_wrapper(
         .selectExpr("CAST(value AS STRING) as json")
         .select(
             F.from_json(
-                F.col("json"), schema=map_avro_to_spark_schema(input.schema.fields)
+                F.col("json"), schema=map_avro_to_spark_schema(input.schema["fields"])
             ).alias("data")
         )
         .select("data.*")
@@ -59,7 +59,7 @@ def file_wrapper(
     spark: SparkSession,
 ) -> DataFrame:
     dfs = [
-        spark.readStream.schema(map_avro_to_spark_schema(input.schema.fields))
+        spark.readStream.schema(map_avro_to_spark_schema(input.schema["fields"]))
         .option("maxFileAge", max_file_age)
         .json(get_folder_location(app_name, input.topic))
         for input in inputs

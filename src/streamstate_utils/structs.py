@@ -1,8 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, is_dataclass
 import marshmallow_dataclass
-import marshmallow.validate
+
 from marshmallow import Schema
 from typing import ClassVar, Type, List, Dict
+
 
 ## Is output_name just the app_name?? that would make sense to me...
 @dataclass
@@ -30,15 +31,9 @@ class FileStruct:
 
 
 @dataclass
-class SchemaStruct:
-    fields: List[Dict[str, str]]
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
-
-
-@dataclass
 class InputStruct:
     topic: str
-    schema: SchemaStruct
+    schema: dict  # partial avro schema, must include "fields"
     sample: List[dict] = field(default_factory=list)  # not all need a sample
     Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
