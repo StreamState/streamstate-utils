@@ -35,16 +35,19 @@ def _get_env_variables_from_config_map() -> dict:
 
 
 def _convert_cluster_and_data_center_to_service_name(
-    data_center: str, cassandra_cluster: str
+    data_center: str, cassandra_cluster: str, namespace: str
 ) -> str:
-    return f"{cassandra_cluster}-{data_center}-service"
+    # service-x.namespace-b.svc.cluster.local
+    return f"{cassandra_cluster}-{data_center}-service.{namespace}.svc.cluster.local"
 
 
 def get_cassandra_inputs_from_config_map() -> CassandraInputStruct:
     env_var = _get_env_variables_from_config_map()
     return CassandraInputStruct(
         cassandra_ip=_convert_cluster_and_data_center_to_service_name(
-            env_var["data_center"], env_var["cassandra_cluster_name"]
+            env_var["data_center"],
+            env_var["cassandra_cluster_name"],
+            env_var["spark_namespace"],
         ),
         cassandra_port=env_var["port"],
         cassandra_user=env_var["username"],

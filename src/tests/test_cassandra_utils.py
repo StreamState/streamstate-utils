@@ -26,8 +26,9 @@ def test_get_cassandra_inputs_from_config_map():
     os.environ["port"] = "9042"
     os.environ["username"] = "user"
     os.environ["password"] = "pass"
+    os.environ["spark_namespace"] = "sn"
     result = get_cassandra_inputs_from_config_map()
-    assert result.cassandra_ip == "ccn-dc-service"
+    assert result.cassandra_ip == "ccn-dc-service.sn.svc.cluster.local"
 
 
 def test_get_cassandra_outputs_from_config_map():
