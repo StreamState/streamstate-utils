@@ -15,6 +15,7 @@ vcs = "git"
 marshmallow-dataclass = "^8.4.1"
 python = "^3.7"
 google-cloud-storage = "^1.37.1"
+google-auth = "^1.29.0"
 
 [tool.poetry.scripts]
 run-test = "streamstate_utils.run_test:main"

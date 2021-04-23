@@ -2,6 +2,7 @@ from google.cloud import storage
 from streamstate_utils.utils import get_folder_location
 from streamstate_utils.structs import InputStruct
 from typing import List
+import google.auth
 
 
 def create_gcs_folders(
@@ -9,7 +10,8 @@ def create_gcs_folders(
     app_name: str,
     inputs: List[InputStruct],
 ):
-    gcs_client = storage.Client()  # optinoally include project
+    credentials, project = google.auth.default()
+    gcs_client = storage.Client(project=project, credentials=credentials)
     bucket = gcs_client.get_bucket(bucket_name)
     for input in inputs:
         folder_name = get_folder_location(app_name, input.topic)
