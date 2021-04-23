@@ -1,9 +1,9 @@
 [tool.poetry]
-authors = ["Daniel Stahl <danstahl1138@gmail.com>"]
-description = "Utilities for cassandra and spark streaming specifically for streamstate"
-homepage = "https://github.com/StreamState/streamstate-utils"
-name = "streamstate-utils"
-repository = "https://github.com/StreamState/streamstate-utils"
+authors = ["Daniel Stahl <danstahl1138@gmail.com>"] 
+description = "Utilities for cassandra and spark streaming specifically for streamstate" 
+homepage = "https://github.com/StreamState/streamstate-utils" 
+name = "streamstate-utils" 
+repository = "https://github.com/StreamState/streamstate-utils" 
 version = "0.0.0" #unused placeholder
 
 [tool.poetry-dynamic-versioning]
@@ -12,10 +12,10 @@ style = "semver"
 vcs = "git"
 
 [tool.poetry.dependencies]
+google-auth = "^1.29.0"
+google-cloud-storage = "^1.37.1"
 marshmallow-dataclass = "^8.4.1"
 python = "^3.7"
-google-cloud-storage = "^1.37.1"
-google-auth = "^1.29.0"
 
 [tool.poetry.scripts]
 run-test = "streamstate_utils.run_test:main"
