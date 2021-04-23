@@ -6,8 +6,8 @@ import sys
 import shutil
 from streamstate_utils.pyspark_utils import (
     map_avro_to_spark_schema,
-    get_folder_location,
 )
+from streamstate_utils.utils import get_folder_location
 import json
 from streamstate_utils.structs import (
     OutputStruct,
