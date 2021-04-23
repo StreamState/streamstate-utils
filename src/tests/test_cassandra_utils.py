@@ -1,17 +1,10 @@
 from streamstate_utils.cassandra_utils import (
-    get_folder_location,
     get_cassandra_table_name_from_app_name,
     get_cassandra_outputs_from_config_map,
     get_cassandra_inputs_from_config_map,
 )
 
 import os
-
-
-def test_folder_location():
-    app_name = "myapp"
-    topic = "topic1"
-    assert get_folder_location(app_name, topic) == "myapp/topic1"
 
 
 def test_get_cassandra_table_name_from_app_name():

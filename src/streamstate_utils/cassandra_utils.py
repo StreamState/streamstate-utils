@@ -3,10 +3,6 @@ from streamstate_utils.structs import CassandraInputStruct, CassandraOutputStruc
 import os
 
 
-def get_folder_location(app_name: str, topic: str) -> str:
-    return os.path.join(app_name, topic)
-
-
 # get org name from ConfigMap
 def get_cassandra_key_space_from_org_name(org_name: str) -> str:
     return org_name
