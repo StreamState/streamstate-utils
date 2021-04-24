@@ -17,6 +17,7 @@ from streamstate_utils.structs import (
     KafkaStruct,
     InputStruct,
 )
+import os
 
 
 def kafka_wrapper(
@@ -56,6 +57,7 @@ def set_cassandra(
 def file_wrapper(
     app_name: str,
     max_file_age: str,
+    base_folder: str,
     process: Callable[[List[DataFrame]], DataFrame],
     inputs: List[InputStruct],
     spark: SparkSession,
@@ -63,7 +65,7 @@ def file_wrapper(
     dfs = [
         spark.readStream.schema(map_avro_to_spark_schema(input.schema["fields"]))
         .option("maxFileAge", max_file_age)
-        .json(get_folder_location(app_name, input.topic))
+        .json(os.path.join(base_folder, get_folder_location(app_name, input.topic)))
         for input in inputs
     ]
     return process(dfs)
@@ -75,8 +77,10 @@ def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, output: OutputStruct):
     ).option("topic", output.output_name).save()
 
 
-def write_parquet(batch_df: DataFrame, output_folder: str):
-    batch_df.write.format("parquet").option("path", output_folder).save()
+def write_parquet(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
+    batch_df.write.format("parquet").option(
+        "path", os.path.join(base_folder, get_folder_location(app_name, topic))
+    ).save()
 
 
 # make sure to call set_cassandra before this

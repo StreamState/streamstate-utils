@@ -13,6 +13,7 @@ import marshmallow_dataclass
 def helper_for_file(
     app_name: str,
     max_file_age: str,
+    base_folder: str,
     process: Callable[[List[DataFrame]], DataFrame],
     inputs: List[InputStruct],
     spark: SparkSession,
@@ -40,6 +41,7 @@ def helper_for_file(
     df = file_wrapper(
         app_name,
         max_file_age,
+        base_folder,
         process,
         inputs,
         spark,

@@ -24,6 +24,7 @@ def test_helper_for_file_succeeds(spark: SparkSession):
     helper_for_file(
         "testhelper",
         "2d",
+        ".",  # current folder
         lambda dfs: dfs[0],
         [
             InputStruct(
@@ -59,6 +60,7 @@ def test_helper_for_file_succeeds_multiple_topics_and_rows(spark: SparkSession):
     helper_for_file(
         "testhelpermultipletopics",
         "2d",
+        ".",  # current folder
         process,
         [
             InputStruct(
@@ -101,6 +103,7 @@ def test_helper_for_file_fails(spark: SparkSession):
         helper_for_file(
             "testhelperfails",
             "2d",
+            ".",  # current folder
             lambda dfs: dfs[0],
             [
                 InputStruct(
@@ -129,6 +132,7 @@ def test_file_wrapper(spark: SparkSession):
     df = file_wrapper(
         app_name,
         "2d",
+        ".",  # current folder
         lambda dfs: dfs[0],
         [
             InputStruct(
