@@ -54,7 +54,6 @@ def helper_for_file(
             json.dump(input.sample, test_file)
     q = df.writeStream.format("memory").queryName(app_name).outputMode("append").start()
     try:
-
         assert q.isActive
         q.processAllAvailable()
         df = spark.sql(f"select * from {app_name}")
@@ -82,5 +81,5 @@ def main():
         outputs = json.load(f)
     spark = SparkSession.builder.master("local").appName("tests").getOrCreate()
     helper_for_file(
-        "testprocess", "2d", process, inputs, spark, outputs  # type: ignore
+        "testprocess", "2d", ".", process, inputs, spark, outputs  # type: ignore
     )
