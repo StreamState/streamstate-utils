@@ -1,22 +1,24 @@
 from google.cloud import storage
 from streamstate_utils.utils import get_folder_location
 from streamstate_utils.structs import InputStruct
-from typing import List
+from typing import List, Optional
 import google.auth
 from google.oauth2 import service_account
 
-
+# may want to use workload identity rather than explicit key
 def create_gcs_folders(
-    path_to_json_key: str,
     bucket_name: str,
     app_name: str,
     inputs: List[InputStruct],
+    path_to_json_key: Optional[str] = None,
 ):
-    # credentials, project = google.auth.default()
-    credentials = service_account.Credentials.from_service_account_file(
-        path_to_json_key
-    )
-    gcs_client = storage.Client(pcredentials=credentials)
+    if path_to_json_key:
+        credentials = service_account.Credentials.from_service_account_file(
+            path_to_json_key
+        )
+    else:
+        credentials, project = google.auth.default()
+    gcs_client = storage.Client(credentials=credentials)
     bucket = gcs_client.get_bucket(bucket_name)
     for input in inputs:
         folder_name = get_folder_location(app_name, input.topic)
