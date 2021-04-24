@@ -5,12 +5,12 @@ from typing import List, Optional
 import google.auth
 from google.oauth2 import service_account
 
-# may want to use workload identity rather than explicit key
+
 def create_gcs_folders(
     bucket_name: str,
     app_name: str,
     inputs: List[InputStruct],
-    path_to_json_key: Optional[str] = None,
+    path_to_json_key: Optional[str] = None,  # if not passed, use workload identity
 ):
     if path_to_json_key:
         credentials = service_account.Credentials.from_service_account_file(
