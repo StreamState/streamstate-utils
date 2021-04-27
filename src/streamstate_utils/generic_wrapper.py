@@ -7,6 +7,7 @@ import shutil
 from streamstate_utils.pyspark_utils import (
     map_avro_to_spark_schema,
 )
+from streamstate_utils.kafka_utils import get_kafka_output_topic_from_app_name
 from streamstate_utils.utils import get_folder_location
 import json
 from streamstate_utils.structs import (
@@ -35,7 +36,7 @@ def kafka_wrapper(
         .selectExpr("CAST(value AS STRING) as json")
         .select(
             F.from_json(
-                F.col("json"), schema=map_avro_to_spark_schema(input.schema["fields"])
+                F.col("json"), schema=map_avro_to_spark_schema(input.schema)
             ).alias("data")
         )
         .select("data.*")
@@ -63,7 +64,7 @@ def file_wrapper(
     spark: SparkSession,
 ) -> DataFrame:
     dfs = [
-        spark.readStream.schema(map_avro_to_spark_schema(input.schema["fields"]))
+        spark.readStream.schema(map_avro_to_spark_schema(input.schema))
         .option("maxFileAge", max_file_age)
         .json(os.path.join(base_folder, get_folder_location(app_name, input.topic)))
         for input in inputs
@@ -71,10 +72,10 @@ def file_wrapper(
     return process(dfs)
 
 
-def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, output: OutputStruct):
+def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version: str):
     batch_df.write.format("kafka").option(
         "kafka.bootstrap.servers", kafka.brokers
-    ).option("topic", output.output_name).save()
+    ).option("topic", get_kafka_output_topic_from_app_name(app_name, version)).save()
 
 
 def write_parquet(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
