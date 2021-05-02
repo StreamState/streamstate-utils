@@ -17,7 +17,10 @@ from streamstate_utils.structs import (
     CassandraOutputStruct,
     KafkaStruct,
     InputStruct,
+    FirestoreOutputStruct,
+    TableStruct,
 )
+from streamstate_utils.firestore import apply_partition_hof
 import os
 
 
@@ -93,6 +96,19 @@ def write_cassandra(batch_df: DataFrame, cassandra: CassandraOutputStruct):
     ).mode(
         "APPEND"
     ).save()
+
+
+def write_firestore(
+    batch_df: DataFrame, firestore: FirestoreOutputStruct, table: TableStruct
+):
+    batch_df.foreachPartition(
+        apply_partition_hof(
+            firestore.project_id,
+            firestore.firestore_collection_name,
+            firestore.version,
+            table.primary_keys,
+        )
+    )
 
 
 def write_console(

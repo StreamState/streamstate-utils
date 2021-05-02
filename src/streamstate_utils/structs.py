@@ -130,3 +130,24 @@ class KafkaStruct:
 
     brokers: str
     Schema: ClassVar[Type[Schema]] = Schema  # for mypy
+
+
+@dataclass
+class FirestoreOutputStruct:
+    """
+    Data class for writing to cassandra
+    ...
+
+    Attributes
+    ----------
+    firestore_collection_name: firestore collection
+    firestore_document_name: firestore document
+    project_id: gcp project
+    version: schema version
+    primary_keys: fields that represent primary keys in the data model
+    """
+
+    firestore_collection_name: str
+    project_id: str
+    version: str
+    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
