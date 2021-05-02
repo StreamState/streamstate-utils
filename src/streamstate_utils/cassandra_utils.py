@@ -32,11 +32,6 @@ def get_cassandra_inputs_from_config_map() -> CassandraInputStruct:
     )
 
 
-# minorly inefficient
-def get_organization_from_config_map() -> str:
-    return get_env_variables_from_config_map()["organization"]
-
-
 def get_cassandra_outputs_from_config_map(
     app_name: str, version: str
 ) -> CassandraOutputStruct:
