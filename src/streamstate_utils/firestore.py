@@ -1,6 +1,5 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
-from pyspark.sql import DataFrame
 from typing import List, Callable, Iterable
 from streamstate_utils.k8s_utils import get_env_variables_from_config_map
 from streamstate_utils.structs import FirestoreOutputStruct
