@@ -5,7 +5,7 @@ from pyspark.sql import DataFrame, SparkSession
 import os
 import json
 import shutil
-from typing import List, Dict, Tuple, Callable
+from typing import List, Dict, Tuple, Callable, Iterable
 import pyspark.sql.functions as F
 from streamstate_utils.structs import InputStruct
 

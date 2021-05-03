@@ -32,9 +32,10 @@ def apply_partition_hof(
         db = open_firestore_connection(project_id)
         doc_ref = db.collection(collection)
         for row in rows:
-            key_values = [row[val] for val in primary_keys]
+            row_dict = row.asDict()
+            key_values = [row_dict[val] for val in primary_keys]
             document_name = get_document_name_from_version_and_keys(key_values, version)
-            doc_ref.document(document_name).set(row)
+            doc_ref.document(document_name).set(row_dict)
 
     return apply_to_partition
 
