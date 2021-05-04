@@ -9,15 +9,6 @@ from typing import List, Dict, Tuple, Callable, Iterable
 import pyspark.sql.functions as F
 from streamstate_utils.structs import InputStruct
 
-# def helper_for_testing(process: Callable[[DataFrame], None], inputs: List[dict], output_mode:str):
-#    inputs.
-#    .writeStream.format("memory").queryName("test").outputMode(output_mode).start()
-
-
-# todo, simulate local spark and local kafka
-# def test_kafka_wrapper():
-# assert datafrae comes back
-
 
 def test_helper_for_file_succeeds(spark: SparkSession):
 

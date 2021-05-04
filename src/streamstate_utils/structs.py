@@ -78,46 +78,6 @@ class InputStruct:
 
 
 @dataclass
-class CassandraInputStruct:
-    """
-    Data class for connecting to cassandra
-    ...
-
-    Attributes
-    ----------
-    cassandra_ip: ip address/hostname of the cassandra database
-    cassandra_port: port of the cassandra database
-    cassandra_password: password
-    cassandra_user: user
-    """
-
-    cassandra_ip: str
-    cassandra_port: str
-    cassandra_password: str
-    cassandra_user: str
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
-
-
-@dataclass
-class CassandraOutputStruct:
-    """
-    Data class for writing to cassandra
-    ...
-
-    Attributes
-    ----------
-    cassandra_cluster: cluster name
-    cassandra_key_space: keyspace to write to
-    cassandra_table_name: table to write to
-    """
-
-    cassandra_cluster: str
-    cassandra_key_space: str
-    cassandra_table_name: str
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
-
-
-@dataclass
 class KafkaStruct:
     """
     Data class for connecting to kafka

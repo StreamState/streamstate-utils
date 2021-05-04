@@ -13,8 +13,6 @@ import json
 from streamstate_utils.structs import (
     OutputStruct,
     FileStruct,
-    CassandraInputStruct,
-    CassandraOutputStruct,
     KafkaStruct,
     InputStruct,
     FirestoreOutputStruct,
@@ -48,16 +46,6 @@ def kafka_wrapper(
     return process(dfs)
 
 
-def set_cassandra(
-    cassandra: CassandraInputStruct,
-    spark: SparkSession,
-):
-    spark.conf.set("spark.cassandra.connection.host", cassandra.cassandra_ip)
-    spark.conf.set("spark.cassandra.connection.rpc.port", cassandra.cassandra_port)
-    spark.conf.set("spark.cassandra.auth.username", cassandra.cassandra_user)
-    spark.conf.set("spark.cassandra.auth.password", cassandra.cassandra_password)
-
-
 def file_wrapper(
     app_name: str,
     max_file_age: str,
@@ -84,17 +72,6 @@ def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version:
 def write_parquet(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
     batch_df.write.format("parquet").option(
         "path", os.path.join(base_folder, get_folder_location(app_name, topic))
-    ).save()
-
-
-# make sure to call set_cassandra before this
-def write_cassandra(batch_df: DataFrame, cassandra: CassandraOutputStruct):
-    batch_df.write.format("org.apache.spark.sql.cassandra").option(
-        "keyspace", cassandra.cassandra_key_space
-    ).option("table", cassandra.cassandra_table_name).option(
-        "cluster", cassandra.cassandra_cluster
-    ).mode(
-        "APPEND"
     ).save()
 
 
