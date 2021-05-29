@@ -1,18 +1,13 @@
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.streaming import StreamingQuery
 import pyspark.sql.functions as F
-from typing import List, Dict, Tuple, Callable
-import sys
-import shutil
+from typing import List, Callable
 from streamstate_utils.pyspark_utils import (
     map_avro_to_spark_schema,
 )
 from streamstate_utils.kafka_utils import get_kafka_output_topic_from_app_name
 from streamstate_utils.utils import get_folder_location
-import json
 from streamstate_utils.structs import (
     OutputStruct,
-    FileStruct,
     KafkaStruct,
     InputStruct,
     FirestoreOutputStruct,
@@ -90,22 +85,23 @@ def write_firestore(
 
 def write_console(
     result: DataFrame,
-    checkpoint: str,
+    checkpoint_location: str,
     mode: str,
 ):
     result.writeStream.format("console").outputMode("append").option(
         "truncate", "false"
-    ).option("checkpointLocation", checkpoint).start().awaitTermination()
+    ).option("checkpointLocation", checkpoint_location).start().awaitTermination()
 
 
 def write_wrapper(
     result: DataFrame,
     output: OutputStruct,
+    checkpoint_location: str,
     write_fn: Callable[[DataFrame], None],
     # processing_time: str = "0",
 ):
     result.writeStream.outputMode(output.mode).option("truncate", "false").trigger(
         processingTime=output.processing_time
-    ).option("checkpointLocation", output.checkpoint_location).foreachBatch(
+    ).option("checkpointLocation", checkpoint_location).foreachBatch(
         lambda df, id: write_fn(df)
     ).start().awaitTermination()

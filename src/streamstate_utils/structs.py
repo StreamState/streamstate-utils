@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field, is_dataclass
-import marshmallow_dataclass
+from dataclasses import dataclass, field  # , is_dataclass
+
+# import marshmallow_dataclass
 
 from marshmallow import Schema
 from typing import ClassVar, Type, List, Dict
@@ -20,7 +21,7 @@ class OutputStruct:
     """
 
     mode: str
-    checkpoint_location: str  # this should almost certainly not be here....derive from the cluster
+    # checkpoint_location: str  # this should almost certainly not be here....derive from the cluster
     # output_name: str
     processing_time: str = "0"
     Schema: ClassVar[Type[Schema]] = Schema  # for mypy
