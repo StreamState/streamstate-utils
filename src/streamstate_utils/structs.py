@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field, is_dataclass
-import marshmallow_dataclass
+from dataclasses import dataclass, field  # , is_dataclass
+
+# import marshmallow_dataclass
 
 from marshmallow import Schema
 from typing import ClassVar, Type, List, Dict
@@ -20,7 +21,7 @@ class OutputStruct:
     """
 
     mode: str
-    checkpoint_location: str  # this should almost certainly not be here....derive from the cluster
+    # checkpoint_location: str  # this should almost certainly not be here....derive from the cluster
     # output_name: str
     processing_time: str = "0"
     Schema: ClassVar[Type[Schema]] = Schema  # for mypy
@@ -74,46 +75,6 @@ class InputStruct:
     topic: str
     schema: List[Dict[str, str]]  # name: "field1", type: "string"
     sample: List[dict] = field(default_factory=list)  # not all need a sample
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
-
-
-@dataclass
-class CassandraInputStruct:
-    """
-    Data class for connecting to cassandra
-    ...
-
-    Attributes
-    ----------
-    cassandra_ip: ip address/hostname of the cassandra database
-    cassandra_port: port of the cassandra database
-    cassandra_password: password
-    cassandra_user: user
-    """
-
-    cassandra_ip: str
-    cassandra_port: str
-    cassandra_password: str
-    cassandra_user: str
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
-
-
-@dataclass
-class CassandraOutputStruct:
-    """
-    Data class for writing to cassandra
-    ...
-
-    Attributes
-    ----------
-    cassandra_cluster: cluster name
-    cassandra_key_space: keyspace to write to
-    cassandra_table_name: table to write to
-    """
-
-    cassandra_cluster: str
-    cassandra_key_space: str
-    cassandra_table_name: str
     Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
 

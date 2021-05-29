@@ -1,6 +1,6 @@
 [tool.poetry]
 authors = ["Daniel Stahl <danstahl1138@gmail.com>"] 
-description = "Utilities for cassandra and spark streaming specifically for streamstate" 
+description = "Utilities for firebase and spark streaming specifically for streamstate" 
 homepage = "https://github.com/StreamState/streamstate-utils" 
 name = "streamstate-utils" 
 repository = "https://github.com/StreamState/streamstate-utils" 
@@ -12,11 +12,11 @@ style = "semver"
 vcs = "git"
 
 [tool.poetry.dependencies]
+firebase-admin = "^5.0.0"
 google-auth = "^1.29.0"
 google-cloud-storage = "^1.37.1"
 marshmallow-dataclass = "^8.4.1"
 python = "^3.7"
-firebase-admin = "^5.0.0"
 
 [tool.poetry.scripts]
 run-test = "streamstate_utils.run_test:main"
@@ -29,6 +29,7 @@ mypy = "^0.812"
 pyspark = "^3.1.1"
 pytest = "^6.2.3"
 pytest-cov = "^2.11.1"
+pre-commit = "^2.13.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
