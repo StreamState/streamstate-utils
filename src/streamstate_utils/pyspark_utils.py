@@ -1,5 +1,4 @@
-from typing import List, Dict, Tuple
-from pyspark.sql import DataFrame
+from typing import List, Dict
 from pyspark.sql.types import (
     IntegerType,
     StringType,

@@ -1,6 +1,5 @@
-from typing import List, Dict, Tuple, Callable, Union
+from typing import List, Callable
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.streaming import StreamingQuery
 import shutil
 import os
 from streamstate_utils.generic_wrapper import file_wrapper
