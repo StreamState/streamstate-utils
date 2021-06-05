@@ -5,7 +5,7 @@ from pyspark.sql import DataFrame, SparkSession
 import os
 import json
 import shutil
-from typing import List, Dict, Tuple, Callable, Iterable
+from typing import List
 import pyspark.sql.functions as F
 from streamstate_utils.structs import InputStruct
 
@@ -20,7 +20,7 @@ def test_helper_for_file_succeeds(spark: SparkSession):
         [
             InputStruct(
                 topic="topic1",
-                schema=[{"name": "field1", "type": "string"}],
+                topic_schema=[{"name": "field1", "type": "string"}],
                 sample=[{"field1": "somevalue"}],
             )
         ],
@@ -56,7 +56,7 @@ def test_helper_for_file_succeeds_multiple_topics_and_rows(spark: SparkSession):
         [
             InputStruct(
                 topic="topic1",
-                schema=[
+                topic_schema=[
                     {"name": "field1", "type": "string"},
                     {"name": "value1", "type": "string"},
                 ],
@@ -67,7 +67,7 @@ def test_helper_for_file_succeeds_multiple_topics_and_rows(spark: SparkSession):
             ),
             InputStruct(
                 topic="topic2",
-                schema=[
+                topic_schema=[
                     {"name": "field1id", "type": "string"},
                     {"name": "value2", "type": "string"},
                 ],
@@ -95,7 +95,7 @@ def test_helper_for_file_fails(spark: SparkSession):
             [
                 InputStruct(
                     topic="topic1",
-                    schema=[{"name": "field1", "type": "string"}],
+                    topic_schema=[{"name": "field1", "type": "string"}],
                     sample=[{"field1": "somevalue1"}],
                 )
             ],
@@ -124,7 +124,7 @@ def test_file_wrapper(spark: SparkSession):
         [
             InputStruct(
                 topic=file_dir,
-                schema=[{"name": "field1", "type": "string"}],
+                topic_schema=[{"name": "field1", "type": "string"}],
             )
         ],
         spark,
