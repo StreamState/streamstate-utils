@@ -15,8 +15,8 @@ vcs = "git"
 firebase-admin = "^5.0.0"
 google-auth = "^1.29.0"
 google-cloud-storage = "^1.37.1"
-marshmallow-dataclass = "^8.4.1"
 python = "^3.7"
+pydantic = "^1.8.2"
 
 [tool.poetry.scripts]
 run-test = "streamstate_utils.run_test:main"

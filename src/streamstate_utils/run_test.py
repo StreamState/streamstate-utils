@@ -7,7 +7,6 @@ from streamstate_utils.generic_wrapper import file_wrapper
 from streamstate_utils.structs import InputStruct
 import json
 import sys
-import marshmallow_dataclass
 
 
 def helper_for_file(
@@ -71,12 +70,12 @@ def helper_for_file(
 def main():
 
     [name, current_path, path_to_inputs, path_to_outputs] = sys.argv
-    input_schema = marshmallow_dataclass.class_schema(InputStruct)()
+    # input_schema = marshmallow_dataclass.class_schema(InputStruct)()
     sys.path.append(current_path)
     from process import process  # type: ignore
 
     with open(path_to_inputs) as f:
-        inputs = [input_schema.load(v) for v in json.load(f)]
+        inputs = [InputStruct(**v) for v in json.load(f)]
     with open(path_to_outputs) as f:
         outputs = json.load(f)
     spark = SparkSession.builder.master("local").appName("tests").getOrCreate()

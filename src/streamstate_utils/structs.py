@@ -1,13 +1,8 @@
-from dataclasses import dataclass, field  # , is_dataclass
-
-# import marshmallow_dataclass
-
-from marshmallow import Schema
-from typing import ClassVar, Type, List, Dict
+from pydantic import BaseModel
+from typing import List, Dict
 
 
-@dataclass
-class OutputStruct:
+class OutputStruct(BaseModel):
     """
     Data class for output kafka topic.
     Note that the output topic name is created seperately from the app_name and version.
@@ -16,19 +11,14 @@ class OutputStruct:
     Attributes
     ----------
     mode: streaming output mode, one of "append", "complete", "update"
-    checkpoint_location: full path to checkpoint location in case spark job crashes.  This should be depricated and put into terraform directly
     processing_time: optional time to wait to aggregate inputs before writing
     """
 
     mode: str
-    # checkpoint_location: str  # this should almost certainly not be here....derive from the cluster
-    # output_name: str
     processing_time: str = "0"
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
 
-@dataclass
-class TableStruct:
+class TableStruct(BaseModel):
     """
     Data class for cassandra table.
     ...
@@ -41,11 +31,9 @@ class TableStruct:
 
     primary_keys: List[str]
     output_schema: List[Dict[str, str]]  # name: "field1", type: "string"
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
 
-@dataclass
-class FileStruct:
+class FileStruct(BaseModel):
     """
     Data class for reading data from files/gcs.
     ...
@@ -56,11 +44,9 @@ class FileStruct:
     """
 
     max_file_age: str
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
 
-@dataclass
-class InputStruct:
+class InputStruct(BaseModel):
     """
     Data class for incoming kafka topics.
     ...
@@ -68,18 +54,16 @@ class InputStruct:
     Attributes
     ----------
     topic: incoming kafka topic
-    schema: list of dictionaries with name and type attributes describing the kafka topic's schema
+    topic_schema: list of dictionaries with name and type attributes describing the kafka topic's schema
     sample: optional list of possible kafka topic payloads (used for running unit tests)
     """
 
     topic: str
-    schema: List[Dict[str, str]]  # name: "field1", type: "string"
-    sample: List[dict] = field(default_factory=list)  # not all need a sample
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
+    topic_schema: List[Dict[str, str]]  # name: "field1", type: "string"
+    sample: List[dict] = []  # not all need a sample
 
 
-@dataclass
-class KafkaStruct:
+class KafkaStruct(BaseModel):
     """
     Data class for connecting to kafka
     ...
@@ -90,11 +74,9 @@ class KafkaStruct:
     """
 
     brokers: str
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
 
 
-@dataclass
-class FirestoreOutputStruct:
+class FirestoreOutputStruct(BaseModel):
     """
     Data class for writing to cassandra
     ...
@@ -102,13 +84,10 @@ class FirestoreOutputStruct:
     Attributes
     ----------
     firestore_collection_name: firestore collection
-    firestore_document_name: firestore document
     project_id: gcp project
     version: schema version
-    primary_keys: fields that represent primary keys in the data model
     """
 
     firestore_collection_name: str
     project_id: str
     version: str
-    Schema: ClassVar[Type[Schema]] = Schema  # for mypy
