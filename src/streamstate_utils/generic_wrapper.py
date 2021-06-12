@@ -18,7 +18,6 @@ import os
 
 
 def kafka_wrapper(
-    app_name: str,
     brokers: str,
     process: Callable[[List[DataFrame]], DataFrame],
     inputs: List[InputStruct],
@@ -38,7 +37,7 @@ def kafka_wrapper(
         .select("data.*")
         for input in inputs
     ]
-    return process(dfs)
+    return process(dfs).withColumn("topic_timestamp", F.current_timestamp())
 
 
 def file_wrapper(
