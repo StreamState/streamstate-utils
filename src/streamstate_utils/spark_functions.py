@@ -1,6 +1,5 @@
-from typing import List, Tuple
 from pyspark import SparkContext
-from pyspark.sql.column import Column, _to_java_column
+from pyspark.sql.column import Column, _to_java_column  # type: ignore
 
 
 def _get_get_jvm_function(name, sc):

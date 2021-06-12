@@ -77,7 +77,7 @@ def write_firestore(
         apply_partition_hof(
             firestore.project_id,
             firestore.firestore_collection_name,
-            firestore.version,
+            firestore.code_version,
             table.primary_keys,
         )
     )
