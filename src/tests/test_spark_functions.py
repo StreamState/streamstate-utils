@@ -7,7 +7,7 @@ import json
 import shutil
 from typing import List
 import pyspark.sql.functions as F
-from streamstate_utils.inverse_functions import standard_deviation, geometric_mean
+from streamstate_utils.spark_functions import standard_deviation, geometric_mean
 
 
 def test_standard_deviation(spark: SparkSession):

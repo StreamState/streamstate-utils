@@ -1,5 +1,5 @@
 name: Coverage
-on: push
+on:  [push, pull_request]
 jobs:
   coverage:
     runs-on: ubuntu-latest
@@ -9,8 +9,15 @@ jobs:
       with:
         python-version: '3.7'
         architecture: x64
+    - name: Setup Scala
+      uses: olafurpg/setup-scala@v10
+      with:
+        java-version: "adopt@1.8"
+    - name: Build and Test
+      run: sbt -v -Dfile.encoding=UTF-8 +test
+    - name: publish local
+      run: sbt publishLocal
     - run: pip install poetry==1.0.5
-    - run: pip install poetry-dynamic-versioning
     - run: poetry install
     - run: poetry run mypy .
     - run: poetry run pytest --cov=streamstate_utils --cov-report=xml
