@@ -1,7 +1,8 @@
 name: publish
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - master
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -11,9 +12,33 @@ jobs:
       with:
         python-version: '3.7'
         architecture: x64
+    - name: Setup Scala
+      uses: olafurpg/setup-scala@v10
+      with:
+        java-version: "adopt@1.8"
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@v0.2.1
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
+        export_default_credentials: true
+        project_id: ${{ env.PROJECT_ID }}
+    - name: Build and Test
+      run: |
+        cd streamstate-utils
+        sbt -v -Dfile.encoding=UTF-8 +test
+        cd ..
+    - name: publish local
+      run: |
+        cd streamstate-utils
+        sbt publishLocal
+        cd ..
     - run: pip install poetry==1.0.5
-    - run: pip install poetry-dynamic-versioning
     - run: poetry install
     - run: poetry run pytest
     - run: poetry build
     - run: poetry publish --username=__token__ --password=${{ secrets.PYPI_API_TOKEN }}
+    
+    - run: |
+        cd streamstate-utils
+        sbt publish # automatically has GOOGLE_APPLICATION_CREDENTIALS specified from setup-gcloud
+        cd ..

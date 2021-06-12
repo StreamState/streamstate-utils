@@ -85,9 +85,10 @@ class FirestoreOutputStruct(BaseModel):
     ----------
     firestore_collection_name: firestore collection
     project_id: gcp project
-    version: schema version
+    code_version: code version
     """
 
     firestore_collection_name: str
     project_id: str
-    version: str
+    # schema_version: str
+    code_version: str

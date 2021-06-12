@@ -1,11 +1,4 @@
 from streamstate_utils.pyspark_utils import map_avro_to_spark_schema
-from pyspark.sql.types import (
-    IntegerType,
-    StructField,
-    StructType,
-    FloatType,
-)
-import os
 
 
 def test_map_avro_to_spark():

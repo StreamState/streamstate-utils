@@ -20,13 +20,16 @@ def get_collection_from_org_name_and_app_name(org_name: str, app_name: str) -> s
     return f"{org_name}_{app_name}"
 
 
-def get_document_name_from_version_and_keys(key_values: list, version: str) -> str:
+def get_document_name_from_version_and_keys(key_values: list, code_version: str) -> str:
     pks = "_".join(key_values)
-    return f"{pks}_{version}"
+    return f"{pks}_{code_version}"
 
 
 def apply_partition_hof(
-    project_id: str, collection: str, version: str, primary_keys: List[str]
+    project_id: str,
+    collection: str,
+    code_version: str,
+    primary_keys: List[str],
 ) -> Callable[[Iterable], None]:
     def apply_to_partition(rows):
         db = open_firestore_connection(project_id)
@@ -34,14 +37,17 @@ def apply_partition_hof(
         for row in rows:
             row_dict = row.asDict()
             key_values = [row_dict[val] for val in primary_keys]
-            document_name = get_document_name_from_version_and_keys(key_values, version)
+            document_name = get_document_name_from_version_and_keys(
+                key_values, code_version
+            )
             doc_ref.document(document_name).set(row_dict)
 
     return apply_to_partition
 
 
 def get_firestore_inputs_from_config_map(
-    app_name: str, version: str
+    app_name: str,
+    code_version: str,
 ) -> FirestoreOutputStruct:
     env_var = get_env_variables_from_config_map()
     organization = env_var["organization"]
@@ -51,5 +57,6 @@ def get_firestore_inputs_from_config_map(
             organization, app_name
         ),
         project_id=project,
-        version=version,
+        # schema_version=schema_version,
+        code_version=code_version,
     )
