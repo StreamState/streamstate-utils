@@ -40,12 +40,10 @@ class GeometricMeanTest extends AnyFunSuite with DataFrameSuiteBase {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
     val dataset = CreateDataSet.create_dataset(sc, sqlCtx)
-    val gm = new GeometricMean
-
     val result =
       dataset
         .groupBy("group")
-        .agg(gm(col("label")).as("GeometricMean"))
+        .agg(functions.geometricMean(col("label")).as("GeometricMean"))
         .collect()
 
     val expected = Seq(("val1", 1.9105460086999304), ("val2", 1.0))
@@ -69,18 +67,16 @@ class StandardDeviationTest extends AnyFunSuite with DataFrameSuiteBase {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
     val dataset = CreateDataSet.create_dataset(sc, sqlCtx)
-    val sd = new StandardDeviation
 
     val result =
       dataset
         .groupBy("group")
-        .agg(sd(col("label")).as("StandardDeviation"))
+        .agg(functions.standardDeviation(col("label")).as("StandardDeviation"))
         .collect()
 
     val expected = Seq(("val1", 0.8755950357709131), ("val2", 0.0))
     val zippedResultExpected: Seq[(Row, (String, Double))] =
       result zip expected
-    println(result)
     zippedResultExpected.foreach({
       case (row, (e1, e2)) => {
         val resultGroup = row.getString(0)

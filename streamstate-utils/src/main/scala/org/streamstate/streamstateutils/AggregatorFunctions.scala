@@ -2,185 +2,82 @@ package org.streamstate.streamstateutils
 
 import org.apache.spark.sql.expressions.MutableAggregationBuffer
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
+import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.Encoder
+import org.apache.spark.sql.Encoders
+import org.apache.spark.sql.functions.udaf
+import org.apache.spark.sql.expressions.{
+  Aggregator,
+  SparkUserDefinedFunction,
+  UserDefinedAggregator,
+  UserDefinedFunction
+}
+import org.apache.spark.sql.catalyst.expressions.aggregate._
+import org.apache.spark.sql.catalyst.expressions._
+import org.apache.spark.sql.{Column}
+class GeometricMean extends Aggregator[Double, (Int, Double), Double] {
+  def zero: (Int, Double) = (0, 1.0)
+  def reduce(
+      buffer: (Int, Double),
+      data: Double
+  ): (Int, Double) = {
+    (buffer._1 + 1, buffer._2 * data)
+  }
+  def merge(
+      b1: (Int, Double),
+      b2: (Int, Double)
+  ): (Int, Double) = {
+    (b1._1 + b2._1, b1._2 * b2._2)
+  }
+  def finish(buffer: (Int, Double)): Double = {
+    math.pow(buffer._2, 1.toDouble / buffer._1)
+  }
 
-class GeometricMean extends UserDefinedAggregateFunction {
-  // This is the input fields for your aggregate function.
-  override def inputSchema: org.apache.spark.sql.types.StructType =
-    StructType(StructField("value", DoubleType) :: Nil)
-
-  // This is the internal fields you keep for computing your aggregate.
-  override def bufferSchema: StructType = StructType(
-    StructField("count", LongType) ::
-      StructField("product", DoubleType) :: Nil
+  def bufferEncoder: Encoder[(Int, Double)] = Encoders.tuple(
+    Encoders.scalaInt,
+    Encoders.scalaDouble
   )
-
-  // This is the output type of your aggregatation function.
-  override def dataType: DataType = DoubleType
-
-  override def deterministic: Boolean = true
-
-  // This is the initial value for your buffer schema.
-  override def initialize(buffer: MutableAggregationBuffer): Unit = {
-    buffer(0) = 0L
-    buffer(1) = 1.0
-  }
-
-  // This is how to update your buffer schema given an input.
-  override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    buffer(0) = buffer.getAs[Long](0) + 1
-    buffer(1) = buffer.getAs[Double](1) * input.getAs[Double](0)
-  }
-
-  // This is how to merge two objects with the bufferSchema type.
-  override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
-    buffer1(0) = buffer1.getAs[Long](0) + buffer2.getAs[Long](0)
-    buffer1(1) = buffer1.getAs[Double](1) * buffer2.getAs[Double](1)
-  }
-
-  // This is where you output the final value, given the final value of your bufferSchema.
-  override def evaluate(buffer: Row): Any = {
-    math.pow(buffer.getDouble(1), 1.toDouble / buffer.getLong(0))
-  }
+  def outputEncoder: Encoder[Double] = Encoders.scalaDouble
 }
 
-class StandardDeviation extends UserDefinedAggregateFunction {
-  // This is the input fields for your aggregate function.
-  override def inputSchema: org.apache.spark.sql.types.StructType =
-    StructType(StructField("value", DoubleType) :: Nil)
+class StandardDeviation
+    extends Aggregator[Double, (Int, Double, Double), Double] {
+  def zero: (Int, Double, Double) = (0, 0.0, 0.0)
+  def reduce(
+      buffer: (Int, Double, Double),
+      data: Double
+  ): (Int, Double, Double) = {
+    (buffer._1 + 1, buffer._2 + data * data, buffer._3 + data)
+  }
+  def merge(
+      b1: (Int, Double, Double),
+      b2: (Int, Double, Double)
+  ): (Int, Double, Double) = {
+    (b1._1 + b2._1, b1._2 + b2._2, b1._3 + b2._3)
+  }
+  def finish(buffer: (Int, Double, Double)): Double = {
+    val mean = buffer._3
+    val n = buffer._1
+    math.sqrt(buffer._2 / (n - 1) - mean * mean / (n * (n - 1)))
+  }
 
-  // This is the internal fields you keep for computing your aggregate.
-  override def bufferSchema: StructType = StructType(
-    StructField("count", LongType) ::
-      StructField("sumsq", DoubleType) ::
-      StructField("sum", DoubleType) :: Nil
+  def bufferEncoder: Encoder[(Int, Double, Double)] = Encoders.tuple(
+    Encoders.scalaInt,
+    Encoders.scalaDouble,
+    Encoders.scalaDouble
   )
-
-  // This is the output type of your aggregatation function.
-  override def dataType: DataType = DoubleType
-
-  override def deterministic: Boolean = true
-
-  // This is the initial value for your buffer schema.
-  override def initialize(buffer: MutableAggregationBuffer): Unit = {
-    buffer(0) = 0L
-    buffer(1) = 0.0
-    buffer(2) = 0.0
-  }
-
-  // This is how to update your buffer schema given an input.
-  override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    buffer(0) = buffer.getAs[Long](0) + 1
-    val v = input.getAs[Double](0)
-    buffer(1) = buffer.getAs[Double](1) + v * v
-    buffer(2) = buffer.getAs[Double](2) + v
-  }
-
-  // This is how to merge two objects with the bufferSchema type.
-  override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
-    buffer1(0) = buffer1.getAs[Long](0) + buffer2.getAs[Long](0)
-    buffer1(1) = buffer1.getAs[Double](1) + buffer2.getAs[Double](1)
-    buffer1(2) = buffer1.getAs[Double](2) + buffer2.getAs[Double](2)
-  }
-
-  // This is where you output the final value, given the final value of your bufferSchema.
-  override def evaluate(buffer: Row): Any = {
-    val mean = buffer.getDouble(2)
-    val n = buffer.getLong(0)
-    math.sqrt(buffer.getDouble(1) / (n - 1) - mean * mean / (n * (n - 1)))
-  }
+  def outputEncoder: Encoder[Double] = Encoders.scalaDouble
 }
 
-class StandardDeviation extends UserDefinedAggregateFunction {
-  // This is the input fields for your aggregate function.
-  override def inputSchema: org.apache.spark.sql.types.StructType =
-    StructType(StructField("value", DoubleType) :: Nil)
+object functions {
 
-  // This is the internal fields you keep for computing your aggregate.
-  override def bufferSchema: StructType = StructType(
-    StructField("count", LongType) ::
-      StructField("sumsq", DoubleType) ::
-      StructField("sum", DoubleType) :: Nil
-  )
-
-  // This is the output type of your aggregatation function.
-  override def dataType: DataType = DoubleType
-
-  override def deterministic: Boolean = true
-
-  // This is the initial value for your buffer schema.
-  override def initialize(buffer: MutableAggregationBuffer): Unit = {
-    buffer(0) = 0L
-    buffer(1) = 0.0
-    buffer(2) = 0.0
+  def standardDeviation(e: Column): Column = {
+    udaf(new StandardDeviation(), Encoders.scalaDouble)(e)
   }
 
-  // This is how to update your buffer schema given an input.
-  override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    buffer(0) = buffer.getAs[Long](0) + 1
-    val v = input.getAs[Double](0)
-    buffer(1) = buffer.getAs[Double](1) + v * v
-    buffer(2) = buffer.getAs[Double](2) + v
-  }
-
-  // This is how to merge two objects with the bufferSchema type.
-  override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
-    buffer1(0) = buffer1.getAs[Long](0) + buffer2.getAs[Long](0)
-    buffer1(1) = buffer1.getAs[Double](1) + buffer2.getAs[Double](1)
-    buffer1(2) = buffer1.getAs[Double](2) + buffer2.getAs[Double](2)
-  }
-
-  // This is where you output the final value, given the final value of your bufferSchema.
-  override def evaluate(buffer: Row): Any = {
-    val mean = buffer.getDouble(2)
-    val n = buffer.getLong(0)
-    math.sqrt(buffer.getDouble(1) / (n - 1) - mean * mean / (n * (n - 1)))
-  }
-}
-
-class WeightedMovingAverage extends UserDefinedAggregateFunction {
-  // This is the input fields for your aggregate function.
-  override def inputSchema: org.apache.spark.sql.types.StructType =
-    StructType(StructField("value", DoubleType) :: Nil)
-
-  // This is the internal fields you keep for computing your aggregate.
-  override def bufferSchema: StructType = StructType(
-    StructField("count", LongType) ::
-      StructField("sum", DoubleType) :: Nil
-  )
-
-  // This is the output type of your aggregatation function.
-  override def dataType: DataType = DoubleType
-
-  override def deterministic: Boolean = true
-
-  // This is the initial value for your buffer schema.
-  override def initialize(buffer: MutableAggregationBuffer): Unit = {
-    buffer(0) = 0L
-    buffer(1) = 0.0
-    buffer(2) = 0.0
-  }
-
-  // This is how to update your buffer schema given an input.
-  override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    buffer(0) = buffer.getAs[Long](0) + 1
-    val v = input.getAs[Double](0)
-    buffer(1) = buffer.getAs[Double](1) + v * v
-    buffer(2) = buffer.getAs[Double](2) + v
-  }
-
-  // This is how to merge two objects with the bufferSchema type.
-  override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
-    buffer1(0) = buffer1.getAs[Long](0) + buffer2.getAs[Long](0)
-    buffer1(1) = buffer1.getAs[Double](1) + buffer2.getAs[Double](1)
-    buffer1(2) = buffer1.getAs[Double](2) + buffer2.getAs[Double](2)
-  }
-
-  // This is where you output the final value, given the final value of your bufferSchema.
-  override def evaluate(buffer: Row): Any = {
-    val mean = buffer.getDouble(2)
-    val n = buffer.getLong(0)
-    math.sqrt(buffer.getDouble(1) / (n - 1) - mean * mean / (n * (n - 1)))
+  def geometricMean(e: Column): Column = {
+    udaf(new GeometricMean(), Encoders.scalaDouble)(e)
   }
 }

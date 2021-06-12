@@ -7,65 +7,68 @@ import json
 import shutil
 from typing import List
 import pyspark.sql.functions as F
-from streamstate_utils.structs import InputStruct
+from streamstate_utils.inverse_functions import standard_deviation, geometric_mean
 
 
-def test_helper_for_file_succeeds_multiple_topics_and_rows(spark: SparkSession):
+def test_standard_deviation(spark: SparkSession):
+    data = [
+        ("val1", 1.0, 0.0),
+        ("val1", 1.0, 0.0),
+        ("val1", 1.0, 1.0),
+        ("val1", 2.0, 1.0),
+        ("val1", 2.0, 1.0),
+        ("val1", 2.0, 1.0),
+        ("val1", 3.0, 0.0),
+        ("val1", 3.0, 0.0),
+        ("val1", 3.0, 0.0),
+        ("val1", 3.0, 0.0),
+        ("val2", 1.0, 0.0),
+        ("val2", 1.0, 0.0),
+        ("val2", 1.0, 0.0),
+        ("val2", 1.0, 1.0),
+        ("val2", 1.0, 1.0),
+    ]
+    table = spark.createDataFrame(data, ["group", "label", "prediction"])
 
-    windowedWordCounts = pairs.reduceByKeyAndWindow(
-        lambda x, y: x + y, lambda x, y: x - y, 30, 10
+    result = (
+        table.groupBy("group")
+        .agg(standard_deviation(F.col("label")).alias("GeometricMean"))
+        .collect()
     )
 
-    def process(dfs: List[DataFrame]) -> DataFrame:
-        [df1, df2] = dfs
-        df1 = df1.withColumn("current_timestamp", F.current_timestamp()).withWatermark(
-            "current_timestamp", "2 hours"
-        )
-        df2 = df2.withColumn("current_timestamp", F.current_timestamp()).withWatermark(
-            "current_timestamp", "2 hours"
-        )
-        return df1.join(
-            df2,
-            (df1.field1 == df2.field1id)
-            & (df1.current_timestamp >= df2.current_timestamp)
-            & (
-                df1.current_timestamp
-                <= (df2.current_timestamp + F.expr("INTERVAL 1 HOURS"))
-            ),
-        ).select("field1", "value1", "value2")
+    expected = [("val1", 0.8755950357709131), ("val2", 0.0)]
 
-    helper_for_file(
-        "testhelpermultipletopics",
-        "2d",
-        ".",  # current folder
-        process,
-        [
-            InputStruct(
-                topic="topic1",
-                topic_schema=[
-                    {"name": "field1", "type": "string"},
-                    {"name": "value1", "type": "string"},
-                ],
-                sample=[
-                    {"field1": "somevalue", "value1": "hi1"},
-                    {"field1": "somevalue1", "value1": "hi2"},
-                ],
-            ),
-            InputStruct(
-                topic="topic2",
-                topic_schema=[
-                    {"name": "field1id", "type": "string"},
-                    {"name": "value2", "type": "string"},
-                ],
-                sample=[
-                    {"field1id": "somevalue", "value2": "goodbye1"},
-                    {"field1id": "somevalue1", "value2": "goodbye2"},
-                ],
-            ),
-        ],
-        spark,
-        [
-            {"field1": "somevalue", "value1": "hi1", "value2": "goodbye1"},
-            {"field1": "somevalue1", "value1": "hi2", "value2": "goodbye2"},
-        ],
+    for row, (e1, e2) in zip(result, expected):
+        assert row.asDict()["GeometricMean"] == e2
+
+
+def test_geometric_mean(spark: SparkSession):
+    data = [
+        ("val1", 1.0, 0.0),
+        ("val1", 1.0, 0.0),
+        ("val1", 1.0, 1.0),
+        ("val1", 2.0, 1.0),
+        ("val1", 2.0, 1.0),
+        ("val1", 2.0, 1.0),
+        ("val1", 3.0, 0.0),
+        ("val1", 3.0, 0.0),
+        ("val1", 3.0, 0.0),
+        ("val1", 3.0, 0.0),
+        ("val2", 1.0, 0.0),
+        ("val2", 1.0, 0.0),
+        ("val2", 1.0, 0.0),
+        ("val2", 1.0, 1.0),
+        ("val2", 1.0, 1.0),
+    ]
+    table = spark.createDataFrame(data, ["group", "label", "prediction"])
+
+    result = (
+        table.groupBy("group")
+        .agg(geometric_mean(F.col("label")).alias("GeometricMean"))
+        .collect()
     )
+
+    expected = [("val1", 1.9105460086999304), ("val2", 1.0)]
+
+    for row, (e1, e2) in zip(result, expected):
+        assert row.asDict()["GeometricMean"] == e2
