@@ -101,7 +101,6 @@ def write_firestore(
 def write_console(
     result: DataFrame,
     checkpoint_location: str,
-    # mode: str,
 ):
     result.writeStream.format("console").outputMode("append").option(
         "truncate", "false"
