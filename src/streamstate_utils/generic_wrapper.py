@@ -17,8 +17,12 @@ from streamstate_utils.firestore import apply_partition_hof
 import os
 
 
+## TODO! provide consistent auth interface rather than hardcoding
+## username and password
 def kafka_wrapper(
     brokers: str,
+    confluent_api_key: str,
+    confluent_secret: str,
     process: Callable[[List[DataFrame]], DataFrame],
     inputs: List[InputStruct],
     spark: SparkSession,
@@ -27,6 +31,17 @@ def kafka_wrapper(
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", brokers)
         .option("subscribe", input.topic)
+        .option("kafka.security.protocol", "SASL_SSL")
+        .option(
+            "kafka.sasl.jaas.config",
+            "kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username='{}' password='{}';".format(
+                confluent_api_key, confluent_secret
+            ),
+        )
+        .option("kafka.ssl.endpoint.identification.algorithm", "https")
+        .option("kafka.sasl.mechanism", "PLAIN")
+        .option("startingOffsets", "earliest")
+        .option("failOnDataLoss", "false")
         .load()
         .selectExpr("CAST(value AS STRING) as json")
         .select(
@@ -63,6 +78,7 @@ def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version:
     ).option("topic", get_kafka_output_topic_from_app_name(app_name, version)).save()
 
 
+## TODO, consider writing delta
 def write_parquet(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
     batch_df.write.format("parquet").option(
         "path", os.path.join(base_folder, get_folder_location(app_name, topic))

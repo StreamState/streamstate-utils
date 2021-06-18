@@ -1,4 +1,4 @@
-from streamstate_utils.generic_wrapper import kafka_wrapper, file_wrapper
+from streamstate_utils.generic_wrapper import file_wrapper
 from streamstate_utils.run_test import helper_for_file
 import pytest
 from pyspark.sql import DataFrame, SparkSession
