@@ -74,6 +74,8 @@ class KafkaStruct(BaseModel):
     """
 
     brokers: str
+    confluent_api_key: str
+    confluent_secret: str
 
 
 class FirestoreOutputStruct(BaseModel):
