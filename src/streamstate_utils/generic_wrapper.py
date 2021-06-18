@@ -34,7 +34,7 @@ def kafka_wrapper(
         .option("kafka.security.protocol", "SASL_SSL")
         .option(
             "kafka.sasl.jaas.config",
-            "kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username='{}' password='{}';".format(
+            "org.apache.kafka.common.security.plain.PlainLoginModule required username='{}' password='{}';".format(
                 confluent_api_key, confluent_secret
             ),
         )
@@ -101,7 +101,7 @@ def write_firestore(
 def write_console(
     result: DataFrame,
     checkpoint_location: str,
-    mode: str,
+    # mode: str,
 ):
     result.writeStream.format("console").outputMode("append").option(
         "truncate", "false"

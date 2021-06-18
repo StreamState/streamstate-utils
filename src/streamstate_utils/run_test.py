@@ -68,7 +68,7 @@ def helper_for_file(
 
 def main():
 
-    [name, current_path, path_to_inputs, path_to_outputs] = sys.argv
+    [_name, current_path, path_to_inputs, path_to_outputs] = sys.argv
     # input_schema = marshmallow_dataclass.class_schema(InputStruct)()
     sys.path.append(current_path)
     from process import process  # type: ignore
