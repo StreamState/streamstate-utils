@@ -1,4 +1,4 @@
-from streamstate_utils.generic_wrapper import file_wrapper
+from streamstate_utils.generic_wrapper import dev_file_wrapper
 from streamstate_utils.run_test import helper_for_file
 import pytest
 from pyspark.sql import DataFrame, SparkSession
@@ -116,7 +116,7 @@ def test_file_wrapper(spark: SparkSession):
     file_dir = "test_file_wrapper"
     os.mkdir(os.path.join(app_name, file_dir))
 
-    df = file_wrapper(
+    df = dev_file_wrapper(
         app_name,
         "2d",
         ".",  # current folder

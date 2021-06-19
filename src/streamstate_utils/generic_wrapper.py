@@ -4,7 +4,10 @@ from typing import List, Callable
 from streamstate_utils.pyspark_utils import (
     map_avro_to_spark_schema,
 )
-from streamstate_utils.kafka_utils import get_kafka_output_topic_from_app_name
+from streamstate_utils.kafka_utils import (
+    get_kafka_output_topic_from_app_name,
+    get_confluent_config,
+)
 from streamstate_utils.utils import get_folder_location
 from streamstate_utils.structs import (
     OutputStruct,
@@ -27,21 +30,20 @@ def kafka_wrapper(
     inputs: List[InputStruct],
     spark: SparkSession,
 ) -> DataFrame:
+    confluent_config = get_confluent_config(brokers, prefix="kafka.")
+
     dfs = [
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", brokers)
+        .option("startingOffsets", "earliest")
+        .option("failOnDataLoss", "false")
         .option("subscribe", input.topic)
-        .option("kafka.security.protocol", "SASL_SSL")
+        .options(**confluent_config)
         .option(
             "kafka.sasl.jaas.config",
             "org.apache.kafka.common.security.plain.PlainLoginModule required username='{}' password='{}';".format(
                 confluent_api_key, confluent_secret
             ),
         )
-        .option("kafka.ssl.endpoint.identification.algorithm", "https")
-        .option("kafka.sasl.mechanism", "PLAIN")
-        .option("startingOffsets", "earliest")
-        .option("failOnDataLoss", "false")
         .load()
         .selectExpr("CAST(value AS STRING) as json")
         .select(
@@ -55,6 +57,20 @@ def kafka_wrapper(
     return process(dfs).withColumn("topic_timestamp", F.current_timestamp())
 
 
+def dev_file_wrapper(
+    app_name: str,
+    max_file_age: str,
+    base_folder: str,
+    process: Callable[[List[DataFrame]], DataFrame],
+    inputs: List[InputStruct],
+    spark: SparkSession,
+) -> DataFrame:
+    return _file_wrapper(
+        app_name, max_file_age, base_folder, process, inputs, spark, "json"
+    )
+
+
+## TODO, consider reading delta
 def file_wrapper(
     app_name: str,
     max_file_age: str,
@@ -63,10 +79,25 @@ def file_wrapper(
     inputs: List[InputStruct],
     spark: SparkSession,
 ) -> DataFrame:
+    return _file_wrapper(
+        app_name, max_file_age, base_folder, process, inputs, spark, "parquet"
+    )
+
+
+def _file_wrapper(
+    app_name: str,
+    max_file_age: str,
+    base_folder: str,
+    process: Callable[[List[DataFrame]], DataFrame],
+    inputs: List[InputStruct],
+    spark: SparkSession,
+    format: str,
+) -> DataFrame:
     dfs = [
         spark.readStream.schema(map_avro_to_spark_schema(input.topic_schema))
         .option("maxFileAge", max_file_age)
-        .json(os.path.join(base_folder, get_folder_location(app_name, input.topic)))
+        .format(format)
+        .load(os.path.join(base_folder, get_folder_location(app_name, input.topic)))
         for input in inputs
     ]
     return process(dfs)

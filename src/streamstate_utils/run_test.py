@@ -2,7 +2,7 @@ from typing import List, Callable
 from pyspark.sql import SparkSession, DataFrame
 import shutil
 import os
-from streamstate_utils.generic_wrapper import file_wrapper
+from streamstate_utils.generic_wrapper import dev_file_wrapper
 from streamstate_utils.structs import InputStruct
 import json
 import sys
@@ -36,7 +36,7 @@ def helper_for_file(
     for input in inputs:
         os.mkdir(os.path.join(file_dir, input.topic))
 
-    df = file_wrapper(
+    df = dev_file_wrapper(
         app_name,
         max_file_age,
         base_folder,
