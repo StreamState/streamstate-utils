@@ -104,14 +104,16 @@ def _file_wrapper(
 
 
 def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version: str):
-    batch_df.write.format("kafka").option(
-        "kafka.bootstrap.servers", kafka.brokers
-    ).option("topic", get_kafka_output_topic_from_app_name(app_name, version)).save()
+    batch_df.select(F.to_json(F.struct(*batch_df.columns)).alias("value")).write.format(
+        "kafka"
+    ).option("kafka.bootstrap.servers", kafka.brokers).option(
+        "topic", get_kafka_output_topic_from_app_name(app_name, version)
+    ).save()
 
 
 ## TODO, consider writing delta
 def write_parquet(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
-    batch_df.write.format("parquet").option(
+    batch_df.write.mode("append").format("parquet").option(
         "path", os.path.join(base_folder, get_folder_location(app_name, topic))
     ).save()
 
