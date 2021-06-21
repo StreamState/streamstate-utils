@@ -23,14 +23,12 @@ import os
 ## TODO! provide consistent auth interface rather than hardcoding
 ## username and password
 def kafka_wrapper(
-    brokers: str,
-    confluent_api_key: str,
-    confluent_secret: str,
+    kafka: KafkaStruct,
     process: Callable[[List[DataFrame]], DataFrame],
     inputs: List[InputStruct],
     spark: SparkSession,
 ) -> DataFrame:
-    confluent_config = get_confluent_config(brokers, prefix="kafka.")
+    confluent_config = get_confluent_config(kafka.brokers, prefix="kafka.")
 
     dfs = [
         spark.readStream.format("kafka")
@@ -41,7 +39,7 @@ def kafka_wrapper(
         .option(
             "kafka.sasl.jaas.config",
             "org.apache.kafka.common.security.plain.PlainLoginModule required username='{}' password='{}';".format(
-                confluent_api_key, confluent_secret
+                kafka.confluent_api_key, kafka.confluent_secret
             ),
         )
         .load()
@@ -104,9 +102,15 @@ def _file_wrapper(
 
 
 def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version: str):
+    confluent_config = get_confluent_config(kafka.brokers, prefix="kafka.")
     batch_df.select(F.to_json(F.struct(*batch_df.columns)).alias("value")).write.format(
         "kafka"
-    ).option("kafka.bootstrap.servers", kafka.brokers).option(
+    ).options(**confluent_config).option(
+        "kafka.sasl.jaas.config",
+        "org.apache.kafka.common.security.plain.PlainLoginModule required username='{}' password='{}';".format(
+            kafka.confluent_api_key, kafka.confluent_secret
+        ),
+    ).option(
         "topic", get_kafka_output_topic_from_app_name(app_name, version)
     ).save()
 
