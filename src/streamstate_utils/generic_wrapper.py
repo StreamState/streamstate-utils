@@ -101,6 +101,14 @@ def _file_wrapper(
     return process(dfs)
 
 
+def _write_file_wrapper(
+    batch_df: DataFrame, app_name: str, base_folder: str, topic: str, format: str
+):
+    batch_df.write.mode("append").format(format).option(
+        "path", os.path.join(base_folder, get_folder_location(app_name, topic))
+    ).save()
+
+
 def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version: str):
     confluent_config = get_confluent_config(kafka.brokers, prefix="kafka.")
     batch_df.select(F.to_json(F.struct(*batch_df.columns)).alias("value")).write.format(
@@ -115,11 +123,13 @@ def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version:
     ).save()
 
 
+def write_json(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
+    _write_file_wrapper(batch_df, app_name, base_folder, topic, "json")
+
+
 ## TODO, consider writing delta
 def write_parquet(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
-    batch_df.write.mode("append").format("parquet").option(
-        "path", os.path.join(base_folder, get_folder_location(app_name, topic))
-    ).save()
+    _write_file_wrapper(batch_df, app_name, base_folder, topic, "parquet")
 
 
 def write_firestore(
