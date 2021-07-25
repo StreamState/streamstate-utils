@@ -4,7 +4,7 @@ description = "Utilities for firebase and spark streaming specifically for strea
 homepage = "https://github.com/StreamState/streamstate-utils"
 name = "streamstate-utils"
 repository = "https://github.com/StreamState/streamstate-utils"
-version = "0.11.0"
+version = "0.12.0"
 
 [tool.poetry.dependencies]
 firebase-admin = "^5.0.0"

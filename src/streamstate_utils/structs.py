@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Union
 
 
 class OutputStruct(BaseModel):
@@ -15,7 +15,7 @@ class OutputStruct(BaseModel):
     """
 
     mode: str
-    processing_time: str = "0"
+    processing_time: Union[str, int] = 0
 
 
 class TableStruct(BaseModel):
