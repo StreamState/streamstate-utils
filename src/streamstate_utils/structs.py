@@ -15,7 +15,7 @@ class OutputStruct(BaseModel):
     """
 
     mode: str
-    processing_time: Union[str, int] = 0
+    processing_time: str = "0 seconds"
 
 
 class TableStruct(BaseModel):
