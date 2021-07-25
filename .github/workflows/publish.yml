@@ -34,6 +34,7 @@ jobs:
         cd ..
     - run: pip install poetry==1.0.5
     - run: poetry install
+    - run: poetry run mypy .
     - run: poetry run pytest
     - run: poetry build
     - run: poetry publish --username=__token__ --password=${{ secrets.PYPI_API_TOKEN }}
