@@ -28,6 +28,17 @@ def kafka_wrapper(
     inputs: List[InputStruct],
     spark: SparkSession,
 ) -> DataFrame:
+    """
+    Read data from kafka
+    ...
+
+    Attributes
+    ----------
+    kafka: kafka parameters
+    process: function to apply to dataframes
+    inputs: for each topic, input parameters
+    spark: the instantiated sparksession
+    """
     confluent_config = get_confluent_config(kafka.brokers, prefix="kafka.")
 
     dfs = [
@@ -63,6 +74,19 @@ def dev_file_wrapper(
     inputs: List[InputStruct],
     spark: SparkSession,
 ) -> DataFrame:
+    """
+    Read data from json files for development
+    ...
+
+    Attributes
+    ----------
+    app_name: name of streaming application
+    max_file_age: oldest file to include in streaming
+    base_folder: base location to read from topic folders
+    process: function to apply to dataframes
+    inputs: for each topic, input parameters
+    spark: the instantiated sparksession
+    """
     return _file_wrapper(
         app_name, max_file_age, base_folder, process, inputs, spark, "json"
     )
@@ -77,6 +101,19 @@ def file_wrapper(
     inputs: List[InputStruct],
     spark: SparkSession,
 ) -> DataFrame:
+    """
+    Read data from parquet files
+    ...
+
+    Attributes
+    ----------
+    app_name: name of streaming application
+    max_file_age: oldest file to include in streaming
+    base_folder: base location to read from topic folders
+    process: function to apply to dataframes
+    inputs: for each topic, input parameters
+    spark: the instantiated sparksession
+    """
     return _file_wrapper(
         app_name, max_file_age, base_folder, process, inputs, spark, "parquet"
     )
@@ -110,6 +147,17 @@ def _write_file_wrapper(
 
 
 def write_kafka(batch_df: DataFrame, kafka: KafkaStruct, app_name: str, version: str):
+    """
+    Write spark streaming back to Kafka
+    ...
+
+    Attributes
+    ----------
+    batch_df: dataframe to write
+    kafka: kafka settings including key and secret
+    app_name: name of streaming application
+    version: code version as defined in FirestoreOutputStruct
+    """
     confluent_config = get_confluent_config(kafka.brokers, prefix="kafka.")
     batch_df.select(F.to_json(F.struct(*batch_df.columns)).alias("value")).write.format(
         "kafka"
@@ -129,12 +177,33 @@ def write_json(batch_df: DataFrame, app_name: str, base_folder: str, topic: str)
 
 ## TODO, consider writing delta
 def write_parquet(batch_df: DataFrame, app_name: str, base_folder: str, topic: str):
+    """
+    Write spark streaming to parquet
+    ...
+
+    Attributes
+    ----------
+    batch_df: dataframe to write
+    app_name: name of streaming application
+    base_folder: base location to create topic folders
+    topic: topic name
+    """
     _write_file_wrapper(batch_df, app_name, base_folder, topic, "parquet")
 
 
 def write_firestore(
     batch_df: DataFrame, firestore: FirestoreOutputStruct, table: TableStruct
 ):
+    """
+    Write spark streaming to firestore
+    ...
+
+    Attributes
+    ----------
+    batch_df: dataframe to write
+    firestore: firestore parameters
+    table: table parameters
+    """
     batch_df.foreachPartition(
         apply_partition_hof(
             firestore.project_id,
@@ -149,6 +218,16 @@ def write_console(
     result: DataFrame,
     checkpoint_location: str,
 ):
+    """
+    Write spark streaming to console, to be used
+    as a standalone streaming for debugging purposes
+    ...
+
+    Attributes
+    ----------
+    result: streaming dataframe
+    checkpoint_location: checkpoint
+    """
     result.writeStream.format("console").outputMode("append").option(
         "truncate", "false"
     ).option("checkpointLocation", checkpoint_location).start().awaitTermination()
@@ -159,8 +238,18 @@ def write_wrapper(
     output: OutputStruct,
     checkpoint_location: str,
     write_fn: Callable[[DataFrame], None],
-    # processing_time: str = "0",
 ):
+    """
+    Write spark streaming generically
+    ...
+
+    Attributes
+    ----------
+    result: streaming dataframe
+    output: output parameters
+    checkpoint_location: checkpoint
+    write_fn: takes a batch dataframe, specifies the logic of the write
+    """
     result.writeStream.outputMode(output.mode).option("truncate", "false").trigger(
         processingTime=output.processing_time
     ).option("checkpointLocation", checkpoint_location).foreachBatch(

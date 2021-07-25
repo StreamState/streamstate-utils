@@ -12,6 +12,17 @@ def create_gcs_folders(
     inputs: List[InputStruct],
     path_to_json_key: Optional[str] = None,  # if not passed, use workload identity
 ):
+    """
+    Create folders in google cloud storage to persist kafka topics
+    ...
+
+    Attributes
+    ----------
+    bucket_name: gCS bucket name
+    app_name: name of streaming application
+    inputs: for each topic, input parameters
+    path_to_json_key: path to key, if not passed then uses workload identity (if set up)
+    """
     if path_to_json_key:
         credentials = service_account.Credentials.from_service_account_file(
             path_to_json_key

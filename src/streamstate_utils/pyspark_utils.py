@@ -26,8 +26,13 @@ def _convert_type(avro_type: str) -> DataType:
 
 def map_avro_to_spark_schema(fields: List[Dict[str, str]]) -> StructType:
     """
-    converts schema defined by list of dictionaries of "name", "type" attributes
+    Converts schema defined by list of dictionaries of "name", "type" attributes
     into Spark schema
+    ...
+
+    Attributes
+    ----------
+    fields: List of "Avro schemas": dictionaries with "name" and "type"
     """
     return StructType(
         [
