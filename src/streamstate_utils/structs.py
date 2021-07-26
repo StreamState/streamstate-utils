@@ -18,6 +18,21 @@ class OutputStruct(BaseModel):
     processing_time: str = "0 seconds"
 
 
+class SchemaStruct(BaseModel):
+    """
+    Data class for (avro) schema
+    ...
+
+    Attributes
+    ----------
+    name: field name
+    type: field type
+    """
+
+    name: str
+    type: str
+
+
 class TableStruct(BaseModel):
     """
     Data class for cassandra table.
@@ -30,7 +45,7 @@ class TableStruct(BaseModel):
     """
 
     primary_keys: List[str]
-    output_schema: List[Dict[str, str]]  # name: "field1", type: "string"
+    output_schema: List[SchemaStruct]  # name: "field1", type: "string"
 
 
 class FileStruct(BaseModel):
@@ -59,7 +74,7 @@ class InputStruct(BaseModel):
     """
 
     topic: str
-    topic_schema: List[Dict[str, str]]  # name: "field1", type: "string"
+    topic_schema: List[SchemaStruct]  # name: "field1", type: "string"
     sample: List[dict] = []  # not all need a sample
 
 

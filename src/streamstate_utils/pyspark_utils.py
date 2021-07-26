@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 from pyspark.sql.types import (
     IntegerType,
     StringType,
@@ -10,6 +10,7 @@ from pyspark.sql.types import (
     FloatType,
     DataType,
 )
+from streamstate_utils.structs import SchemaStruct
 
 
 def _convert_type(avro_type: str) -> DataType:
@@ -24,7 +25,7 @@ def _convert_type(avro_type: str) -> DataType:
     return avro_type_conversion[avro_type]
 
 
-def map_avro_to_spark_schema(fields: List[Dict[str, str]]) -> StructType:
+def map_avro_to_spark_schema(fields: List[SchemaStruct]) -> StructType:
     """
     Converts schema defined by list of dictionaries of "name", "type" attributes
     into Spark schema
@@ -32,11 +33,8 @@ def map_avro_to_spark_schema(fields: List[Dict[str, str]]) -> StructType:
 
     Attributes
     ----------
-    fields: List of "Avro schemas": dictionaries with "name" and "type"
+    fields: List of "Avro schemas"
     """
     return StructType(
-        [
-            StructField(field["name"], _convert_type(field["type"]), True)
-            for field in fields
-        ]
+        [StructField(field.name, _convert_type(field.type), True) for field in fields]
     )
